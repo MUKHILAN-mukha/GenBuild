@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans;
+  }
+}
+
+.glass-panel {
+  @apply bg-surface border border-border backdrop-blur-md rounded-xl shadow-2xl;
+}
+
+.font-space {
+  font-family: 'Space Grotesk', sans-serif;
+}
