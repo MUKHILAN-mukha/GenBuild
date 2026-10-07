@@ -185,9 +185,12 @@ function RevealAnimation({ seat, gameState }) {
           ASSIGNING SCENARIO...
         </motion.div>
       ) : (
-        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center" style={{ color: scenario.color, textShadow: `0 0 40px ${scenario.color}80` }}>
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center w-full max-w-4xl mx-auto flex flex-col items-center h-[80vh] justify-center" style={{ color: scenario.color, textShadow: `0 0 40px ${scenario.color}80` }}>
           <h3 className="font-mono text-xl mb-4 tracking-widest uppercase opacity-80">{scenario.label}</h3>
-          <h1 className="text-5xl md:text-7xl font-space font-bold leading-tight max-w-4xl mx-auto text-white">{scenario.title}</h1>
+          <h1 className="text-5xl md:text-6xl font-space font-bold leading-tight text-white mb-8">{scenario.title}</h1>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="w-full text-left text-lg text-white/90 leading-relaxed bg-black/40 p-8 rounded-xl border whitespace-pre-wrap overflow-y-auto custom-scrollbar" style={{ borderColor: `${scenario.color}40`, textShadow: 'none' }}>
+            {scenario.desc}
+          </motion.div>
         </motion.div>
       )}
     </div>
