@@ -173,14 +173,20 @@ io.on('connection', socket => {
     serverTime: Date.now()
   });
 
-  socket.on('register_admin', (pin) => {
-    // PIN check omitted for brevity in prototype, could verify against env here
-    adminSockets.add(socket.id);
-    socket.emit('state_update', {
-      state,
-      onlineSeats: Array.from(onlineSeats.entries()).filter(([_, s]) => s.size > 0).map(([id]) => id),
-      serverTime: Date.now()
-    });
+  socket.on('register_admin', (pin, callback) => {
+    const validPin = process.env.ADMIN_PIN || '2102';
+    if (pin === validPin) {
+      adminSockets.add(socket.id);
+      if (callback) callback({ success: true });
+      // Send fresh state immediately on auth
+      socket.emit('state_update', {
+        state,
+        onlineSeats: Array.from(onlineSeats.entries()).filter(([_, s]) => s.size > 0).map(([id]) => id),
+        serverTime: Date.now()
+      });
+    } else {
+      if (callback) callback({ success: false, error: 'Invalid PIN' });
+    }
   });
 
   // Clock sync ping

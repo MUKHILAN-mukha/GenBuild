@@ -5,19 +5,38 @@ import { motion } from 'framer-motion';
 
 export default function Hub() {
   const { socket, gameState, onlineSeats, serverTimeOffset } = useSocket();
-  const [pin, setPin] = useState('');
+  const [pin, setPin] = useState(() => localStorage.getItem('hub_pin') || '');
   const [authed, setAuthed] = useState(() => localStorage.getItem('hub_authed') === 'true');
 
   useEffect(() => {
     if (authed) {
-      localStorage.setItem('hub_authed', 'true');
-      socket.emit('register_admin', pin);
+      const savedPin = localStorage.getItem('hub_pin') || pin;
+      const onConnect = () => socket.emit('register_admin', savedPin, (res) => {
+        if (!res?.success) {
+          setAuthed(false);
+          localStorage.removeItem('hub_authed');
+        }
+      });
+      if (socket.connected) onConnect();
       
-      const onConnect = () => socket.emit('register_admin', pin);
       socket.on('connect', onConnect);
       return () => socket.off('connect', onConnect);
     }
   }, [authed, socket, pin]);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    socket.emit('register_admin', pin, (res) => {
+      if (res?.success) {
+        setAuthed(true);
+        localStorage.setItem('hub_authed', 'true');
+        localStorage.setItem('hub_pin', pin);
+      } else {
+        alert(res?.error || 'Authentication failed');
+        setPin('');
+      }
+    });
+  };
 
   if (!authed) {
     return (
@@ -25,8 +44,8 @@ export default function Hub() {
         <div className="glass-panel p-8 w-96 text-center">
           <Key className="w-12 h-12 mx-auto mb-4 text-theme-blue opacity-80" />
           <h2 className="text-2xl font-space font-bold mb-6">Hub Authentication</h2>
-          <form onSubmit={(e) => { e.preventDefault(); setAuthed(true); }} className="flex flex-col gap-4">
-            <input type="password" value={pin} onChange={e=>setPin(e.target.value)} autoFocus placeholder="Enter Admin PIN (try 1234)" className="w-full bg-black/40 border border-border rounded-lg py-3 px-4 text-center tracking-[0.5em] focus:border-theme-blue focus:outline-none" />
+          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+            <input type="password" value={pin} onChange={e=>setPin(e.target.value)} autoFocus placeholder="Enter Admin PIN" className="w-full bg-black/40 border border-border rounded-lg py-3 px-4 text-center tracking-[0.5em] focus:border-theme-blue focus:outline-none" />
             <button type="submit" className="bg-theme-blue hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">LOGIN</button>
           </form>
         </div>
